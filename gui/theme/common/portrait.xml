@@ -177,6 +177,16 @@
 		<page name="main2">
 			<template name="page"/>
 
+			<action>
+				<conditions>
+					<condition var1="tw_unlock_pass" op="!=" var2="0"/>
+					<condition var1="tw_unlock_pass" op="!=" var2="tw_pass" />
+				</conditions>
+				<actions>
+					<action function="page">unlock_pass</action>
+				</actions>
+			</action>
+
 			<text style="text_l">
 				<placement x="%col1_x_header%" y="%row3_header_y%"/>
 				<text>{@twrp_header=Team Win Recovery Project}</text>
@@ -239,6 +249,61 @@
 				<text>{@reboot_btn=Reboot}</text>
 				<action function="page">reboot</action>
 			</button>
+		</page>
+
+		<page name="unlock_pass">
+			<template name="page"/>
+
+			<text style="text_m_accent">
+				<placement x="%center_x%" y="%row2_y%" placement="5"/>
+				<text>Please enter password:</text>
+			</text>
+
+			<input>
+				<placement x="%indent%" y="%row3_input_y%" w="%content_width%" h="%input_height%"/>
+				<text>%tw_pass_display%</text>
+				<data name="tw_pass" mask="*" maskvariable="tw_pass_display" />
+				<restrict minlen="1" maxlen="254"/>
+				<action function="page">try_unlock_pass</action>
+			</input>
+
+			<fill color="%accent_color%">
+				<placement x="%indent%" y="row4a_y" w="%content_width%" h="input_line_width" placement="1"/>
+			</fill>
+
+			<fill color="%text_fail_color%">
+				<condition var1="tw_unlock_password_fail" var2="1"/>
+				<placement x="%indent%" y="row4a_y" w="%content_width%" h="input_line_width" placement="1"/>
+			</fill>
+
+			<text style="text_m_fail">
+				<condition var1="tw_password_fail" var2="1"/>
+				<placement x="%indent%" y="%row5_y%"/>
+				<text>Password failed, please try again!</text>
+			</text>
+
+			<template name="keyboardtemplate"/>
+		</page>
+
+		<page name="try_unlock_pass">
+			<template name="page"/>
+
+			<action>
+				<condition var1="tw_unlock_pass" op="!=" var2="tw_pass"/>
+				<actions>
+					<action function="set">tw_password_fail=1</action>
+					<action function="page">unlock_pass</action>
+				</actions>
+			</action>
+
+			<action>
+				<condition var1="tw_unlock_pass" var2="tw_pass"/>
+				<actions>
+					<action function="set">tw_password_fail=0</action>
+					<action function="set">tw_page_done=1</action>
+					<action function="page">main2</action>
+				</actions>
+			</action>
 		</page>
 
 		<page name="install">
@@ -738,6 +803,9 @@
 				<action function="set">tw_cancel_param=</action>
 				<action function="set">tw_show_exclamation=0</action>
 				<action function="set">tw_show_reboot=0</action>
+                <!-- Set tw_unlock_pass to anything different from 0 to activate password locking -->
+                <!-- WARNING: you should also set the property ro.adb.secure=1 to block root adb access from untrusted computers -->
+				<action function="set">tw_unlock_pass=0</action>
 				<action function="set">tw_crypto_user_id=</action>
 				<action function="set">tw_multiuser_warning_accepted=</action>
 				<action function="set">tw_multiuser_warning_destination=</action>
@@ -3628,6 +3696,13 @@
 				<listitem name="{@change_twrp_folder_btn=Change TWRP folder}">
 					<condition var1="tw_is_encrypted" var2="0"/>
 					<action function="page">changeTwrpFolder</action>
+				</listitem>
+				<listitem name="{@lock_twrp_btn=Lock TWRP}">
+					<condition var1="tw_unlock_pass" op="!=" var2="0"/>
+					<actions>
+						<action function="set">tw_pass=</action>
+						<action function="reload"/>
+					</actions>
 				</listitem>
 				<listitem name="{@decrypt_users=Decrypt Users}">
 					<conditions>
