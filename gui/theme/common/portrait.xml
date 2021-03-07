@@ -3051,7 +3051,7 @@
 						<action function="set">tw_slider_text={@swipe_reboot=Swipe to Reboot}</action>
 						<action function="page">rebootcheck</action>
 					</actions>
-				</button>
+				</listitem>
 			</listbox>
 
 			<text style="text_m">
